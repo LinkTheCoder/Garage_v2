@@ -1,4 +1,4 @@
-# C# Övning 3 - Garage 1.0
+# C# Övning - Garage 1.0
 
 | Filer | Ansvar |
 | :--- | :--- |
