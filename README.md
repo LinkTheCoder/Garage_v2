@@ -1,12 +1,12 @@
 # C# Övning - Garage v2
 
-| Filer | Ansvar |
+| Filer - Interface | Ansvar |
 | :--- | :--- |
 | **IVehicle.cs** | Interface för fordon – `RegistrationNumber`, `Color`, `NumberOfWheels` |
 | **IHandler.cs** | Interface för garage-logik |
 | **IUI.cs** | Interface för användargränssnittet |
 
-| Filer | Ansvar |
+| Filer - Fordon | Ansvar |
 | :--- | :--- |
 | **Vehicle.cs** | Fordonsklass – implementerar `IVehicle` |
 | **Car.cs** | Subklass – adderar `FuelType` (Gasoline/Diesel/Electric/Hybrid) |
@@ -14,9 +14,15 @@
 | **Airplane.cs** | Subklass – adderar `NumberOfEngines` |
 | **Bus.cs** | Subklass – adderar `NumberOfSeats` |
 | **Boat.cs** | Subklass – adderar `Length` |
+
+| Filer - Garage | Ansvar |
+| :--- | :--- |
 | **Garage.cs** | Generisk kollektion `Garage<T> where T : IVehicle` |
 | **GarageHandler.cs** | Implementerar `IHandler` – hanterar logiken mellan UI och Garage |
 | **GarageUI.cs** | Implementerar `IUI` – meny och all interaktion med användaren |
+
+| Filer - Start | Ansvar |
+| :--- | :--- |
 | **Program.cs** | Ingångsport – skapar `GarageHandler` och `GarageUI`, kör via interfaces |
 
 ## Funktioner
