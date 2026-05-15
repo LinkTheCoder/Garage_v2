@@ -1,14 +1,17 @@
 /// <summary>
-/// Lagrar ett garage som kan innehålla Vehicle-objekt.
-/// Garaget kan också vara null om inget garage har skapats än.
-/// Visar en startmeny med olika alternativ.
+/// Användargränssnitt för garagehanteringen.
+/// Kommunicerar med garaget via IHandler och implementerar IUI.
 /// </summary>
 namespace Garage
 {
-
-    internal class GarageUI
+    internal class GarageUI : IUI
     {
-        private Garage<Vehicle>? _garage;
+        private readonly IHandler _handler;
+
+        public GarageUI(IHandler handler)
+        {
+            _handler = handler;
+        }
 
         public void Run()
         {
@@ -34,12 +37,12 @@ namespace Garage
 
         /// <summary>
         /// Initierar garaget genom att be användaren om en kapacitet.
-        /// Frågr om användaren vill fylla garaget med några exempelfordon.
+        /// Frågar om användaren vill fylla garaget med några exempelfordon.
         /// </summary>
         private void InitGarage()
         {
             int capacity = ReadInt("Enter garage capacity: ", 1, 1000);
-            _garage = new Garage<Vehicle>(capacity);
+            _handler.CreateGarage(capacity);
             Console.WriteLine($"Garage created with capacity {capacity}.");
 
             Console.Write("Populate with sample vehicles? (y/n): ");
@@ -64,10 +67,10 @@ namespace Garage
 
             foreach (var v in samples)
             {
-                if (_garage!.Count < _garage.Capacity)
-                    _garage.Add(v);
+                if (!_handler.IsFull)
+                    _handler.AddVehicle(v);
             }
-            Console.WriteLine($"{_garage!.Count} sample vehicle(s) added.");
+            Console.WriteLine($"{_handler.Count} sample vehicle(s) added.");
         }
 
         /// <summary>
@@ -76,7 +79,7 @@ namespace Garage
         private void ShowMenu()
         {
             Console.WriteLine();
-            Console.WriteLine($"--- Menu (Parked: {_garage!.Count}/{_garage.Capacity}) ---");
+            Console.WriteLine($"--- Menu (Parked: {_handler.Count}/{_handler.Capacity}) ---");
             Console.WriteLine("1. List all vehicles");
             Console.WriteLine("2. Add vehicle");
             Console.WriteLine("3. Remove vehicle");
@@ -91,8 +94,8 @@ namespace Garage
         /// </summary>
         private void ListVehicles()
         {
-            if (_garage!.Count == 0) { Console.WriteLine("The garage is empty."); return; }
-            foreach (var v in _garage)
+            if (_handler.Count == 0) { Console.WriteLine("The garage is empty."); return; }
+            foreach (var v in _handler.GetAllVehicles())
                 Console.WriteLine(v);
         }
 
@@ -101,20 +104,11 @@ namespace Garage
         /// </summary>
         private void ListVehicleTypes()
         {
-            if (_garage!.Count == 0) { Console.WriteLine("The garage is empty."); return; }
-
-            var counts = new Dictionary<string, int>();
-            foreach (Vehicle v in _garage)
-            {
-                string typeName = v.GetType().Name;
-                if (!counts.ContainsKey(typeName))
-                    counts[typeName] = 0;
-                counts[typeName]++;
-            }
+            if (_handler.Count == 0) { Console.WriteLine("The garage is empty."); return; }
 
             Console.WriteLine();
-            foreach (var entry in counts)
-                Console.WriteLine($"{entry.Key}: {entry.Value}");
+            foreach (var (typeName, count) in _handler.GetVehicleTypeCounts())
+                Console.WriteLine($"{typeName}: {count}");
         }
 
         /// <summary>
@@ -124,7 +118,7 @@ namespace Garage
         /// </summary>
         private void AddVehicle()
         {
-            if (_garage!.Count >= _garage.Capacity)
+            if (_handler.IsFull)
             {
                 PrintError("Garage is full!");
                 return;
@@ -136,12 +130,12 @@ namespace Garage
             Console.Write("Registration number: ");
             string reg = Console.ReadLine()?.Trim().ToUpper() ?? "";
             if (string.IsNullOrEmpty(reg)) { PrintError("Invalid registration."); return; }
-            if (_garage.Contains(reg)) { PrintError("A vehicle with that registration already exists."); return; }
+            if (_handler.ContainsVehicle(reg)) { PrintError("A vehicle with that registration already exists."); return; }
 
             Console.Write("Color: ");
             string color = Console.ReadLine()?.Trim() ?? "Unknown";
 
-            Vehicle? vehicle = type switch
+            IVehicle? vehicle = type switch
             {
                 1 => CreateCar(reg, color),
                 2 => CreateMotorcycle(reg, color),
@@ -153,7 +147,7 @@ namespace Garage
 
             if (vehicle is null) return;
 
-            if (_garage.Add(vehicle))
+            if (_handler.AddVehicle(vehicle))
                 Console.WriteLine($"Vehicle {reg} added.");
             else
                 PrintError("Could not add vehicle.");
@@ -163,32 +157,32 @@ namespace Garage
         /// Metod för att skapa ett Car-, Motorcycle-, Airplane-, Bus- eller Boat-objekt.
         /// Med möjlighet att ange registreringsnummer, färg samt bränsle-/cylindervolym-/motor-/sittplats-/längd-egenskap.
         /// </summary>
-        private Car CreateCar(string reg, string color)
+        private IVehicle CreateCar(string reg, string color)
         {
             Console.WriteLine("Fuel types: 0=Gasoline  1=Diesel  2=Electric  3=Hybrid");
             int ft = ReadInt("Choose fuel type: ", 0, 3);
             return new Car(reg, color, (FuelType)ft);
         }
 
-        private Motorcycle CreateMotorcycle(string reg, string color)
+        private IVehicle CreateMotorcycle(string reg, string color)
         {
             double cc = ReadDouble("Cylinder volume (cc): ", 50, 3000);
             return new Motorcycle(reg, color, cc);
         }
 
-        private Airplane CreateAirplane(string reg, string color)
+        private IVehicle CreateAirplane(string reg, string color)
         {
             int engines = ReadInt("Number of engines: ", 1, 8);
             return new Airplane(reg, color, engines);
         }
 
-        private Bus CreateBus(string reg, string color)
+        private IVehicle CreateBus(string reg, string color)
         {
             int seats = ReadInt("Number of seats: ", 1, 200);
             return new Bus(reg, color, seats);
         }
 
-        private Boat CreateBoat(string reg, string color)
+        private IVehicle CreateBoat(string reg, string color)
         {
             double length = ReadDouble("Length in meters: ", 1, 500);
             return new Boat(reg, color, length);
@@ -202,7 +196,7 @@ namespace Garage
         {
             Console.Write("Enter registration number to remove: ");
             string reg = Console.ReadLine()?.Trim().ToUpper() ?? "";
-            if (_garage!.Remove(reg))
+            if (_handler.RemoveVehicle(reg))
                 Console.WriteLine($"Vehicle {reg} removed.");
             else
                 PrintError("Vehicle not found.");
@@ -216,7 +210,7 @@ namespace Garage
         {
             Console.Write("Enter registration number: ");
             string reg = Console.ReadLine()?.Trim().ToUpper() ?? "";
-            var v = _garage!.Find(reg);
+            var v = _handler.FindVehicle(reg);
             if (v is not null)
                 Console.WriteLine(v);
             else
@@ -252,7 +246,7 @@ namespace Garage
                 int.TryParse(wheelsInput, out wheelsFilter);
 
             /// Applicera filters
-            Vehicle[] results = _garage!.FindAll(v =>
+            IVehicle[] results = _handler.SearchVehicles(v =>
             {
                 if (typeFilter != 0)
                 {

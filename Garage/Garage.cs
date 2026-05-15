@@ -7,7 +7,7 @@ using System.Collections;
 /// </summary>
 namespace Garage
 {
-    internal class Garage<T> : IEnumerable<T> where T : Vehicle
+    internal class Garage<T> : IEnumerable<T> where T : IVehicle
     {
         private readonly T?[] _vehicles;
         private int _count;
@@ -54,7 +54,7 @@ namespace Garage
                 if (_vehicles[i]!.RegistrationNumber == registrationNumber.ToUpper())
                 {
                     _vehicles[i] = _vehicles[_count - 1];
-                    _vehicles[_count - 1] = null;
+                    _vehicles[_count - 1] = default;
                     _count--;
                     return true;
                 }
@@ -73,7 +73,7 @@ namespace Garage
                 if (vehicle.RegistrationNumber == reg)
                     return vehicle;
             }
-            return null;
+            return default;
         }
 
         public bool Contains(string registrationNumber)

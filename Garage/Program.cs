@@ -9,7 +9,9 @@ namespace Garage
     {
         static void Main(string[] args)
         {
-            new GarageUI().Run();
+            IHandler handler = new GarageHandler();
+            IUI ui = new GarageUI(handler);
+            ui.Run();
         }
     }
 }

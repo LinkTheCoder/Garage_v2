@@ -5,7 +5,7 @@
 /// </summary>
 namespace Garage
 {
-    internal abstract class Vehicle
+    internal abstract class Vehicle : IVehicle
     {
         public string RegistrationNumber { get; }
         public string Color { get; set; }
