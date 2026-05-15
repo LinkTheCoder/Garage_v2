@@ -3,8 +3,11 @@
 | Filer | Ansvar |
 | :--- | :--- |
 | **IVehicle.cs** | Interface för fordon – `RegistrationNumber`, `Color`, `NumberOfWheels` |
-| **IHandler.cs** | Interface för garage-logik – definierar operationer som UI använder |
+| **IHandler.cs** | Interface för garage-logik |
 | **IUI.cs** | Interface för användargränssnittet |
+
+| Filer | Ansvar |
+| :--- | :--- |
 | **Vehicle.cs** | Fordonsklass – implementerar `IVehicle` |
 | **Car.cs** | Subklass – adderar `FuelType` (Gasoline/Diesel/Electric/Hybrid) |
 | **Motorcycle.cs** | Subklass – adderar `CylinderVolume` |
