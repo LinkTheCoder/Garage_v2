@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 
 /// <summary>
 /// Ett generisk garage klass som lagrar fordon i en privat array.
@@ -68,12 +69,7 @@ namespace Garage
         public T? Find(string registrationNumber)
         {
             string reg = registrationNumber.ToUpper();
-            foreach (T vehicle in this)
-            {
-                if (vehicle.RegistrationNumber == reg)
-                    return vehicle;
-            }
-            return default;
+            return this.FirstOrDefault(v => v.RegistrationNumber == reg);
         }
 
         public bool Contains(string registrationNumber)
@@ -87,26 +83,7 @@ namespace Garage
         /// </summary>
         public T[] FindAll(Func<T, bool> predicate)
         {
-
-            int matchCount = 0;
-            for (int i = 0; i < _count; i++)
-            {
-                if (predicate(_vehicles[i]!))
-                    matchCount++;
-            }
-
-            T[] result = new T[matchCount];
-            int index = 0;
-            for (int i = 0; i < _count; i++)
-            {
-                if (predicate(_vehicles[i]!))
-                {
-                    result[index] = _vehicles[i]!;
-                    index++;
-                }
-            }
-
-            return result;
+            return this.Where(predicate).ToArray();
         }
         /// <summary>
         /// Tillåter foreach-loopar över garaget.

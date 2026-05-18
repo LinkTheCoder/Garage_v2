@@ -1,3 +1,5 @@
+using System.Linq;
+
 /// <summary>
 /// Hanterar all logik mellan UI-lagret och Garage-klassen.
 /// Abstraherar bort direkt kontakt mellan GarageUI och Garage.
@@ -68,18 +70,11 @@ namespace Garage
         /// </summary>
         public IEnumerable<(string TypeName, int Count)> GetVehicleTypeCounts()
         {
-            if (_garage is null) yield break;
+            if (_garage is null) return Enumerable.Empty<(string, int)>();
 
-            var counts = new Dictionary<string, int>();
-            foreach (var v in _garage)
-            {
-                string typeName = v.GetType().Name;
-                if (!counts.ContainsKey(typeName))
-                    counts[typeName] = 0;
-                counts[typeName]++;
-            }
-            foreach (var entry in counts)
-                yield return (entry.Key, entry.Value);
+            return _garage
+                .GroupBy(v => v.GetType().Name)
+                .Select(g => (g.Key, g.Count()));
         }
 
         /// <summary>
