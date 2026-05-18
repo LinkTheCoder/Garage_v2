@@ -13,6 +13,8 @@ namespace Garage
 
         protected Vehicle(string registrationNumber, string color, int numberOfWheels)
         {
+            if (string.IsNullOrWhiteSpace(registrationNumber)) throw new ArgumentException("Registration number cannot be empty.", nameof(registrationNumber));
+            if (string.IsNullOrWhiteSpace(color)) throw new ArgumentException("Color cannot be empty.", nameof(color));
             RegistrationNumber = registrationNumber.ToUpper();
             Color = color;
             NumberOfWheels = numberOfWheels;

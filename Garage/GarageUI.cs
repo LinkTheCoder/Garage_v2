@@ -133,7 +133,8 @@ namespace Garage
             if (_handler.ContainsVehicle(reg)) { PrintError("A vehicle with that registration already exists."); return; }
 
             Console.Write("Color: ");
-            string color = Console.ReadLine()?.Trim() ?? "Unknown";
+            string color = Console.ReadLine()?.Trim() ?? "";
+            if (string.IsNullOrEmpty(color)) { PrintError("Invalid color."); return; }
 
             IVehicle? vehicle = type switch
             {
